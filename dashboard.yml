@@ -1,0 +1,1159 @@
+apiVersion: influxdata.com/v2alpha1
+kind: Label
+metadata:
+    name: cool-ritchie-86d001
+spec:
+    color: '#326BBA'
+    name: inputs.cpu
+---
+apiVersion: influxdata.com/v2alpha1
+kind: Label
+metadata:
+    name: friendly-newton-86d011
+spec:
+    color: '#326BBA'
+    name: inputs.swap
+---
+apiVersion: influxdata.com/v2alpha1
+kind: Label
+metadata:
+    name: gallant-shirley-86d00b
+spec:
+    color: '#326BBA'
+    name: inputs.mem
+---
+apiVersion: influxdata.com/v2alpha1
+kind: Label
+metadata:
+    name: kind-rosalind-86d005
+spec:
+    color: '#326BBA'
+    name: inputs.diskio
+---
+apiVersion: influxdata.com/v2alpha1
+kind: Label
+metadata:
+    name: objective-saha-86d007
+spec:
+    color: '#326BBA'
+    name: inputs.docker
+---
+apiVersion: influxdata.com/v2alpha1
+kind: Label
+metadata:
+    name: peaceful-goldwasser-86d015
+spec:
+    color: '#108174'
+    name: outputs.influxdb_v2
+---
+apiVersion: influxdata.com/v2alpha1
+kind: Label
+metadata:
+    name: quizzical-blackburn-86d00d
+spec:
+    color: '#326BBA'
+    name: inputs.net
+---
+apiVersion: influxdata.com/v2alpha1
+kind: Label
+metadata:
+    name: reverent-liskov-86d013
+spec:
+    color: '#326BBA'
+    name: inputs.system
+---
+apiVersion: influxdata.com/v2alpha1
+kind: Label
+metadata:
+    name: stubborn-montalcini-86d003
+spec:
+    color: '#326BBA'
+    name: inputs.disk
+---
+apiVersion: influxdata.com/v2alpha1
+kind: Label
+metadata:
+    name: wonderful-sanderson-86d00f
+spec:
+    color: '#326BBA'
+    name: inputs.processes
+---
+apiVersion: influxdata.com/v2alpha1
+kind: Label
+metadata:
+    name: zealous-wozniak-86d009
+spec:
+    color: '#326BBA'
+    name: inputs.kernel
+---
+apiVersion: influxdata.com/v2alpha1
+kind: Bucket
+metadata:
+    name: great-borg-86d019
+spec:
+    name: test-bucket
+---
+apiVersion: influxdata.com/v2alpha1
+kind: Bucket
+metadata:
+    name: recursing-grothendieck-86d017
+spec:
+    name: node-bucket
+---
+apiVersion: influxdata.com/v2alpha1
+kind: CheckThreshold
+metadata:
+    name: confident-faraday-86d01f
+spec:
+    description: Container mem usage is above 80% for 15 minutes
+    every: 15m0s
+    name: Container Mem Usage Pct
+    query: |-
+        from(bucket: "docker")
+          |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+          |> filter(fn: (r) => r["_measurement"] == "docker_container_mem")
+          |> filter(fn: (r) => r["_field"] == "usage_percent")
+          |> aggregateWindow(every: 15m, fn: mean)
+          |> yield(name: "mean")
+    status: active
+    statusMessageTemplate: 'Check: ${ r._check_name } for container {r.container_name} is: ${ r._level } '
+    thresholds:
+        - level: WARN
+          type: greater
+          value: 80
+        - level: CRIT
+          type: greater
+          value: 90
+        - level: OK
+          type: lesser
+          value: 80
+---
+apiVersion: influxdata.com/v2alpha1
+kind: CheckThreshold
+metadata:
+    name: practical-sutherland-86d01d
+spec:
+    description: Container disk usage is above 80%
+    every: 15m0s
+    name: Container Disk Usage
+    query: |-
+        from(bucket: "docker")
+          |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+          |> filter(fn: (r) => r["_measurement"] == "docker_container_blkio")
+          |> filter(fn: (r) => r["_field"] == "usage_percent")
+          |> aggregateWindow(every: 15m, fn: mean)
+          |> yield(name: "mean")
+    status: active
+    statusMessageTemplate: 'Check: ${ r._check_name } is: ${ r._level }'
+    thresholds:
+        - level: WARN
+          type: greater
+          value: 80
+        - level: CRIT
+          type: greater
+          value: 90
+        - level: OK
+          type: lesser
+          value: 80
+---
+apiVersion: influxdata.com/v2alpha1
+kind: CheckThreshold
+metadata:
+    name: righteous-wescoff-86d01b
+spec:
+    description: Container cpu usage is above 80% for 15 minutes
+    every: 15m0s
+    name: Container CPU Usage Pct
+    query: |-
+        from(bucket: "docker")
+          |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+          |> filter(fn: (r) => r["_measurement"] == "docker_container_cpu")
+          |> filter(fn: (r) => r["_field"] == "usage_percent")
+          |> aggregateWindow(every: 15m, fn: mean)
+          |> yield(name: "mean")
+    status: active
+    statusMessageTemplate: 'Check: ${ r._check_name } for container {r.container_name} is: ${ r._level }'
+    thresholds:
+        - level: WARN
+          type: greater
+          value: 80
+        - level: CRIT
+          type: greater
+          value: 90
+        - level: OK
+          type: lesser
+          value: 80
+---
+apiVersion: influxdata.com/v2alpha1
+kind: CheckThreshold
+metadata:
+    name: youthful-golick-86d021
+spec:
+    every: 10s
+    name: Restart loop detector
+    query: |-
+        from(bucket: "test-bucket")
+          |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+          |> filter(fn: (r) => r["_measurement"] == "Start counts")
+          |> filter(fn: (r) => r["_field"] == "Start count")
+          |> aggregateWindow(every: 1m, fn: mean, createEmpty: false)
+          |> yield(name: "mean")
+    status: active
+    statusMessageTemplate: Abnormal restart number detected
+    thresholds:
+        - level: WARN
+          type: greater
+          value: 1
+        - level: CRIT
+          type: greater
+          value: 2
+        - level: INFO
+          type: greater
+          value: 0
+        - level: OK
+          type: lesser
+          value: 1
+---
+apiVersion: influxdata.com/v2alpha1
+kind: NotificationEndpointPagerDuty
+metadata:
+    name: cranky-gauss-86d023
+spec:
+    name: 'PagerDuty '
+    routingKey:
+        secretRef:
+            key: 0c2b832720f1a000-routing-key
+    status: active
+    url: http://localhost:8086/orgs/fdc42951f5049390/alert-history
+---
+apiVersion: influxdata.com/v2alpha1
+kind: NotificationEndpointSlack
+metadata:
+    name: dazzling-sammet-86d025
+spec:
+    description: Slack notification
+    name: Slack notification
+    status: active
+    url: https://hooks.slack.com/services/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
+---
+apiVersion: influxdata.com/v2alpha1
+kind: NotificationRule
+metadata:
+    name: fasting-hopper-c6d003
+spec:
+    endpointName: dazzling-sammet-86d025
+    every: 1m0s
+    messageTemplate: |-
+        Notification Rule: ${ r._notification_rule_name } triggered by check: ${ r._check_name }: ${ r._message }.
+        Level: ${r._level}
+        <@natalie.kim >
+    name: Slack notification
+    statusRules:
+        - currentLevel: ANY
+          previousLevel: OK
+---
+apiVersion: influxdata.com/v2alpha1
+kind: NotificationRule
+metadata:
+    name: frosty-lamarr-c6d001
+spec:
+    endpointName: cranky-gauss-86d023
+    every: 1m0s
+    messageTemplate: 'Notification Rule: ${ r._notification_rule_name } triggered by check: ${ r._check_name }: ${ r._message }'
+    name: PagerDuty Alert
+    statusRules:
+        - currentLevel: CRIT
+          previousLevel: ANY
+---
+apiVersion: influxdata.com/v2alpha1
+kind: NotificationRule
+metadata:
+    name: sleepy-aryabhata-86d027
+spec:
+    endpointName: dazzling-sammet-86d025
+    every: 5m0s
+    name: Crit Notifier
+    statusRules:
+        - currentLevel: CRIT
+          previousLevel: OK
+---
+apiVersion: influxdata.com/v2alpha1
+kind: Task
+metadata:
+    name: eerie-elbakyan-46d00b
+spec:
+    associations:
+        - kind: Label
+          name: objective-saha-86d007
+        - kind: Label
+          name: peaceful-goldwasser-86d015
+    every: 20s
+    name: Bulk start count uploader
+    query: |-
+        getResults = (regex, container) =>
+            from(bucket: "test-bucket")
+                |> range(start: -5m)
+                |> filter(fn: (r) => r["_measurement"] == "docker_container_status")
+                |> filter(fn: (r) => r["_field"] == "started_at")
+                |> filter(fn: (r) => r["container_name"] =~ regex)
+                |> unique()
+                |> count()
+                |> map(fn: (r) => ({r with _value: r._value - 1}))
+                |> keep(columns: ["_value"])
+                |> sum()
+                |> map(fn: (r) => ({r with _measurement: "Start counts", _time: now(), _field: container}))
+
+        union(
+            tables: [
+                getResults(regex: /(?i)access-service/, container: "access-service"),
+                getResults(regex: /(?i)lns-service/, container: "lns-service"),
+                getResults(regex: /(?i)identity-service/, container: "identity-service"),
+                getResults(regex: /(?i)organisation-service/, container: "organisation-service"),
+                getResults(regex: /(?i)device-registry-service/, container: "device-registry-service"),
+                getResults(regex: /(?i)network-manager-service/, container: "network-manager-service"),
+                getResults(regex: /(?i)notification-service/, container: "notification-service"),
+                getResults(regex: /(?i)influx-service/, container: "influx-service"),
+                getResults(regex: /(?i)history-logs-service/, container: "history-logs-service"),
+                getResults(regex: /(?i)data-egress-service/, container: "data-egress-service"),
+                getResults(regex: /(?i)telegraf-service/, container: "telegraf-service"),
+            ],
+        )
+            |> to(bucket: "node-bucket")
+---
+apiVersion: influxdata.com/v2alpha1
+kind: Task
+metadata:
+    name: hungry-johnson-46d011
+spec:
+    associations:
+        - kind: Label
+          name: objective-saha-86d007
+        - kind: Label
+          name: peaceful-goldwasser-86d015
+    every: 20s
+    name: Bulk uptime uploader
+    query: |-
+        getResults = (regex, container) =>
+            from(bucket: "test-bucket")
+                |> range(start: -20s)
+                |> filter(fn: (r) => r["_measurement"] == "docker_container_status")
+                |> filter(fn: (r) => r["container_name"] =~ regex)
+                |> filter(fn: (r) => r["_field"] == "uptime_ns")
+                |> filter(fn: (r) => r["_value"] >= 2000000000)
+                |> last()
+                |> keep(columns: ["_value"])
+                |> bottom(n: 1)
+                |> map(
+                    fn: (r) =>
+                        ({r with _measurement: "container_uptime",
+                            _value: 20,
+                            _time: now(),
+                            _field: container,
+                        }),
+                )
+
+        union(
+            tables: [
+                getResults(regex: /(?i)access-service/, container: "access-service"),
+                getResults(regex: /(?i)lns-service/, container: "lns-service"),
+                getResults(regex: /(?i)identity-service/, container: "identity-service"),
+                getResults(regex: /(?i)organisation-service/, container: "organisation-service"),
+                getResults(regex: /(?i)device-registry-service/, container: "device-registry-service"),
+                getResults(regex: /(?i)network-manager-service/, container: "network-manager-service"),
+                getResults(regex: /(?i)notification-service/, container: "notification-service"),
+                getResults(regex: /(?i)influx-service/, container: "influx-service"),
+                getResults(regex: /(?i)history-logs-service/, container: "history-logs-service"),
+                getResults(regex: /(?i)data-egress-service/, container: "data-egress-service"),
+                getResults(regex: /(?i)telegraf-service/, container: "telegraf-service"),
+            ],
+        )
+            |> to(bucket: "node-bucket")
+---
+apiVersion: influxdata.com/v2alpha1
+kind: Task
+metadata:
+    name: intelligent-snyder-46d005
+spec:
+    associations:
+        - kind: Label
+          name: objective-saha-86d007
+        - kind: Label
+          name: peaceful-goldwasser-86d015
+    cron: 59 23  * * *
+    name: Daily Uptime Uploader
+    query: |-
+        import "math"
+
+
+
+        from(bucket: "node-bucket")
+            |> range(start: -24h)
+            |> filter(fn: (r) => r["_measurement"] == "container_uptime")
+            |> filter(
+                fn: (r) =>
+                    r["_field"] == "access-service" or r["_field"] == "data-egress-service" or r["_field"]
+                        ==
+                        "device-registry-service" or r["_field"] == "history-logs-service" or r["_field"]
+                        ==
+                        "identity-service" or r["_field"] == "influx-service" or r["_field"]
+                        ==
+                        "lns-service" or r["_field"] == "network-manager-service" or r["_field"]
+                        ==
+                        "notification-service" or r["_field"] == "organisation-service" or r["_field"]
+                        ==
+                        "telegraf-service",
+            )
+            |> aggregateWindow(every: 24h, fn: sum, createEmpty: false)
+            |> last()
+            |> keep(columns: ["_value"])
+            |> sum()
+            |> map(
+                fn: (r) =>
+                    ({r with _measurement: "daily_uptime",
+                        _time: now(),
+                        _field: "daily",
+                        _value: math.round(x: float(v: r._value / (86400 * 11) * 100)),
+                            //                 _value: float(v: 100),
+
+                    }),
+            )
+            |> to(bucket: "node-bucket")
+---
+apiVersion: influxdata.com/v2alpha1
+kind: Dashboard
+metadata:
+    name: agreeing-beaver-06d001
+spec:
+    associations:
+        - kind: Label
+          name: objective-saha-86d007
+        - kind: Label
+          name: reverent-liskov-86d013
+    charts:
+        - height: 1
+          kind: Markdown
+          name: Name this Cell
+          note: '## Docker Daemon'
+          staticLegend: {}
+          width: 12
+        - axes:
+            - base: "10"
+              name: x
+              scale: linear
+            - base: "10"
+              name: "y"
+              scale: linear
+          colorizeRows: true
+          colors:
+            - hex: '#31C0F6'
+              id: f92af984-b42f-4357-94fe-60849b3ccabb
+              name: Nineteen Eighty Four
+              type: scale
+            - hex: '#A500A5'
+              id: 64ed87fa-16b7-464a-aad9-b7e7afd799f6
+              name: Nineteen Eighty Four
+              type: scale
+            - hex: '#FF7E27'
+              id: 4036e179-5dcc-403d-9f80-429a4d39e39d
+              name: Nineteen Eighty Four
+              type: scale
+          geom: line
+          height: 3
+          hoverDimension: auto
+          kind: Xy
+          legendColorizeRows: true
+          legendOpacity: 1
+          legendOrientationThreshold: 1e+08
+          name: Exit Code per Container
+          opacity: 1
+          orientationThreshold: 1e+08
+          position: overlaid
+          queries:
+            - query: |-
+                from(bucket: "test-bucket")
+                  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+                  |> filter(fn: (r) => r["_measurement"] == "docker_container_status")
+                  |> filter(fn: (r) => r["_field"] == "exitcode")
+                  |> group(columns: ["container_name"])
+                  |> aggregateWindow(every: 1m, fn: max, createEmpty: false)
+                  |> yield(name: "max")
+          staticLegend:
+            colorizeRows: true
+            opacity: 1
+            orientationThreshold: 1e+08
+            widthRatio: 1
+          width: 6
+          widthRatio: 1
+          xCol: _time
+          yCol: _value
+          yPos: 1
+        - axes:
+            - base: "10"
+              name: x
+              scale: linear
+            - base: "10"
+              name: "y"
+              scale: linear
+          colorizeRows: true
+          colors:
+            - hex: '#31C0F6'
+              id: 091b6e56-d206-4553-8341-2cb07633e711
+              name: Nineteen Eighty Four
+              type: scale
+            - hex: '#A500A5'
+              id: 402ce5cd-e89e-44df-a6f2-9baa60535424
+              name: Nineteen Eighty Four
+              type: scale
+            - hex: '#FF7E27'
+              id: 3e8a2f50-32d5-4869-aea0-5d7865fc24a4
+              name: Nineteen Eighty Four
+              type: scale
+          geom: line
+          height: 3
+          hoverDimension: auto
+          kind: Xy
+          legendColorizeRows: true
+          legendOpacity: 1
+          legendOrientationThreshold: 1e+08
+          name: Restart tracker
+          opacity: 1
+          orientationThreshold: 1e+08
+          position: overlaid
+          queries:
+            - query: |-
+                from(bucket: "node-bucket")
+                  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+                  |> filter(fn: (r) => r["_measurement"] == "Start counts")
+                  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)
+                  |> yield(name: "mean")
+          staticLegend:
+            colorizeRows: true
+            opacity: 1
+            orientationThreshold: 1e+08
+            widthRatio: 1
+          width: 6
+          widthRatio: 1
+          yPos: 4
+        - height: 1
+          kind: Markdown
+          name: Name this Cell
+          note: '# System Stats'
+          staticLegend: {}
+          width: 12
+          yPos: 7
+        - colors:
+            - hex: '#00C9FF'
+              name: laser
+              type: text
+          height: 1
+          kind: Single_Stat
+          name: System Uptime
+          queries:
+            - query: |-
+                from(bucket: "test-bucket")
+                  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+                  |> filter(fn: (r) => r["_measurement"] == "system")
+                  |> filter(fn: (r) => r["_field"] == "uptime")
+                  |> map(fn: (r) => ({r with _value: float(v: r._value) / 86400.0}))
+          staticLegend: {}
+          suffix: ' days'
+          width: 2
+          yPos: 8
+        - axes:
+            - base: "10"
+              name: x
+              scale: linear
+            - base: "2"
+              name: "y"
+              scale: linear
+            - base: "10"
+              name: y2
+              scale: linear
+          geom: line
+          height: 2
+          kind: Xy
+          name: Swap
+          queries:
+            - query: |-
+                from(bucket: "test-bucket")
+                  |> range(start: v.timeRangeStart)
+                  |> filter(fn: (r) => r._measurement == "swap")
+                  |> filter(fn: (r) => r._field == "total" or r._field == "used")
+                  |> window(period: v.windowPeriod)
+                  |> mean()
+                  |> group(columns: ["_value", "_time", "_start", "_stop"], mode: "except")
+                  |> yield(name: "mean")
+          staticLegend: {}
+          width: 3
+          yPos: 9
+        - axes:
+            - base: "10"
+              name: x
+              scale: linear
+            - base: "2"
+              label: Bytes
+              name: "y"
+              scale: linear
+            - base: "10"
+              name: y2
+              scale: linear
+          geom: line
+          height: 3
+          kind: Xy
+          name: Network TX trafic per container / sec
+          queries:
+            - query: |-
+                from(bucket: "test-bucket")
+                  |> range(start: v.timeRangeStart, stop:v.timeRangeStop)
+                  |> filter(fn: (r) => r._measurement == "docker_container_net")
+                  |> filter(fn: (r) => r._field == "tx_bytes")
+                  |> derivative(unit:1s, nonNegative: false)
+                  |> window(period: v.windowPeriod)
+                  |> mean()
+                  |> keep(columns: ["_measurement","container_name", "host","_value","_field","_stop"])
+                  |> group(columns: ["_value", "_time", "_start", "_stop"],mode: "except")
+          staticLegend: {}
+          width: 6
+          yPos: 11
+        - height: 1
+          kind: Markdown
+          name: Name this Cell
+          note: '# Container Stats'
+          staticLegend: {}
+          width: 12
+          yPos: 14
+        - axes:
+            - base: "10"
+              name: x
+              scale: linear
+            - base: "10"
+              name: "y"
+              scale: linear
+              suffix: '%'
+            - base: "10"
+              name: y2
+              scale: linear
+          geom: line
+          height: 3
+          kind: Xy
+          name: Disk Usage
+          queries:
+            - query: |-
+                from(bucket: "test-bucket")
+                  |> range(start: v.timeRangeStart)
+                  |> filter(fn: (r) => r._measurement == "disk")
+                  |> filter(fn: (r) => r._field == "used_percent")
+                  |> window(period: v.windowPeriod)
+                  |> mean()
+                  |> group(columns: ["_value", "_time", "_start", "_stop"], mode: "except")
+                  |> yield(name: "mean")
+          staticLegend: {}
+          width: 3
+          yPos: 15
+        - colors:
+            - hex: '#00C9FF'
+              name: laser
+              type: text
+          decimalPlaces: 2
+          height: 1
+          kind: Single_Stat
+          name: System Load
+          queries:
+            - query: |-
+                from(bucket:"test-bucket")
+                  |> range(start: v.timeRangeStart)
+                  |> filter(fn: (r) => r._measurement == "system")
+                  |> filter(fn: (r) => r._field == "load1")
+                  |> window(period: v.windowPeriod)
+                  |> mean()
+                  |> group(columns: ["_value", "_time", "_start", "_stop"], mode: "except")
+                  |> yield(name: "mean")
+          staticLegend: {}
+          width: 1
+          xPos: 2
+          yPos: 8
+        - axes:
+            - base: "10"
+              name: x
+              scale: linear
+            - base: "10"
+              label: Load
+              name: "y"
+              scale: linear
+            - base: "10"
+              name: y2
+              scale: linear
+          geom: line
+          height: 3
+          kind: Xy
+          name: System Load
+          queries:
+            - query: |-
+                from(bucket: "test-bucket")
+                  |> range(start: v.timeRangeStart)
+                  |> filter(fn: (r) => r._measurement == "system")
+                  |> filter(fn: (r) => r._field == "load1" or r._field == "load5" or r._field == "load15")
+                  |> window(period: v.windowPeriod)
+                  |> mean()
+                  |> group(columns: ["_value", "_time", "_start", "_stop"], mode: "except")
+                  |> yield(name: "mean")
+          staticLegend: {}
+          width: 3
+          xPos: 3
+          yPos: 8
+        - axes:
+            - base: "10"
+              name: x
+              scale: linear
+            - base: "10"
+              name: "y"
+              scale: linear
+          geom: line
+          height: 3
+          kind: Xy
+          name: Memory usage % per container
+          queries:
+            - query: |-
+                from(bucket: "test-bucket")
+                  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+                  |> filter(fn: (r) => r._measurement == "docker_container_mem")
+                  |> filter(fn: (r) => r._field == "usage_percent")
+                  |> window(period: v.windowPeriod)
+                  |> mean()
+                  |> group(columns: ["_value", "_time", "_start", "_stop"], mode: "except")
+                  |> keep(columns: ["_measurement","container_name", "host","_value","_field","_stop"])
+                  |> yield(name: "mean")
+          staticLegend: {}
+          width: 3
+          xCol: _stop
+          xPos: 3
+          yCol: _value
+          yPos: 15
+        - colors:
+            - hex: '#00C9FF'
+              name: laser
+              type: text
+          decimalPlaces: 2
+          height: 1
+          kind: Single_Stat
+          name: Docker Daemon nCPUs
+          queries:
+            - query: |-
+                from(bucket: "test-bucket")
+                  |> range(start: v.timeRangeStart)
+                  |> filter(fn: (r) => r._measurement == "docker")
+                  |> filter(fn: (r) => r._field == "n_cpus")
+                  |> window(period: v.windowPeriod)
+                  |> last()
+                  |> group(columns: ["_value", "_time", "_start", "_stop"], mode: "except")
+                  |> yield(name: "last")
+          staticLegend: {}
+          suffix: ' cpus'
+          width: 2
+          xPos: 6
+          yPos: 1
+        - colors:
+            - hex: '#00C9FF'
+              name: laser
+              type: text
+          decimalPlaces: 2
+          height: 2
+          kind: Single_Stat
+          name: Total Num Containers
+          queries:
+            - query: |-
+                from(bucket: "test-bucket")
+                  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+                  |> filter(fn: (r) => r["_measurement"] == "docker")
+                  |> filter(fn: (r) => r["_field"] == "n_containers")
+          staticLegend: {}
+          width: 2
+          xPos: 6
+          yPos: 2
+        - axes:
+            - base: "10"
+              name: x
+              scale: linear
+            - base: "10"
+              name: "y"
+              scale: linear
+          colorizeRows: true
+          colors:
+            - hex: '#31C0F6'
+              id: 091b6e56-d206-4553-8341-2cb07633e711
+              name: Nineteen Eighty Four
+              type: scale
+            - hex: '#A500A5'
+              id: 402ce5cd-e89e-44df-a6f2-9baa60535424
+              name: Nineteen Eighty Four
+              type: scale
+            - hex: '#FF7E27'
+              id: 3e8a2f50-32d5-4869-aea0-5d7865fc24a4
+              name: Nineteen Eighty Four
+              type: scale
+          geom: line
+          height: 3
+          hoverDimension: xy
+          kind: Xy
+          legendColorizeRows: true
+          legendOpacity: 1
+          legendOrientationThreshold: -1
+          name: 'Uptime tracker '
+          opacity: 1
+          orientationThreshold: 1e+08
+          position: overlaid
+          queries:
+            - query: |-
+                from(bucket: "node-bucket")
+                  |> range(start: -7d)
+                  |> filter(fn: (r) => r["_measurement"] == "container_uptime")
+                  |> aggregateWindow(every: 12h, fn: sum, createEmpty: true)
+                  |> yield(name: "sum")
+          staticLegend:
+            colorizeRows: true
+            opacity: 1
+            orientationThreshold: 1e+08
+            widthRatio: 1
+          width: 6
+          widthRatio: 1
+          xCol: _time
+          xPos: 6
+          yCol: _value
+          yPos: 4
+        - axes:
+            - base: "10"
+              name: x
+              scale: linear
+            - base: "10"
+              name: "y"
+              scale: linear
+              suffix: '%'
+            - base: "10"
+              name: y2
+              scale: linear
+          geom: line
+          height: 3
+          kind: Xy
+          name: CPU Usage
+          queries:
+            - query: |-
+                from(bucket: "test-bucket")
+                  |> range(start: v.timeRangeStart)
+                  |> filter(fn: (r) => r._measurement == "cpu")
+                  |> filter(fn: (r) => r._field == "usage_user" or r._field == "usage_system" or r._field == "usage_idle")
+                  |> filter(fn: (r) => r.cpu == "cpu-total")
+                  |> window(period: v.windowPeriod)
+                  |> mean()
+                  |> group(columns: ["_value", "_time", "_start", "_stop"], mode: "except")
+                  |> yield(name: "mean")
+          staticLegend: {}
+          width: 3
+          xPos: 6
+          yPos: 8
+        - axes:
+            - base: "10"
+              name: x
+              scale: linear
+            - base: "2"
+              label: Bytes
+              name: "y"
+              scale: linear
+            - base: "10"
+              name: y2
+              scale: linear
+          colors:
+            - hex: '#FDC44F'
+              name: Cthulhu
+              type: scale
+            - hex: '#007C76'
+              name: Cthulhu
+              type: scale
+            - hex: '#8983FF'
+              name: Cthulhu
+              type: scale
+          geom: line
+          height: 3
+          kind: Xy
+          name: Network RX trafic per container / sec
+          queries:
+            - query: |-
+                from(bucket: "test-bucket")
+                  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+                  |> filter(fn: (r) => r._measurement == "docker_container_net")
+                  |> filter(fn: (r) => r._field == "rx_bytes" )
+                  |> derivative(unit: 1s, nonNegative: false)
+                  |> window(period: v.windowPeriod)
+                  |> mean()
+                  |> keep(columns: ["_measurement","container_name", "host","_value","_field","_stop"])
+                  |> group(columns: ["_value", "_time", "_start", "_stop"], mode: "except")
+          staticLegend: {}
+          width: 6
+          xCol: _stop
+          xPos: 6
+          yCol: _value
+          yPos: 11
+        - axes:
+            - base: "10"
+              name: x
+              scale: linear
+            - base: "10"
+              name: "y"
+              scale: linear
+          geom: line
+          height: 3
+          kind: Xy
+          name: Memory usage per container
+          queries:
+            - query: |-
+                from(bucket: "test-bucket")
+                  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+                  |> filter(fn: (r) => r._measurement == "docker_container_mem")
+                  |> filter(fn: (r) => r._field == "usage")
+                  |> window(period: v.windowPeriod)
+                  |> mean()
+                  |> group(columns: ["_value", "_time", "_start", "_stop"], mode: "except")
+                  |> keep(columns: ["_measurement","container_name", "host","_value","_field","_stop"])
+                  |> yield(name: "mean")
+          staticLegend: {}
+          width: 3
+          xPos: 6
+          yPos: 15
+        - colors:
+            - hex: '#00C9FF'
+              name: laser
+              type: text
+          decimalPlaces: 2
+          height: 1
+          kind: Single_Stat
+          name: Docker Daemon Total Mem
+          queries:
+            - query: |-
+                from(bucket: "test-bucket")
+                  |> range(start: v.timeRangeStart)
+                  |> filter(fn: (r) => r._measurement == "docker")
+                  |> filter(fn: (r) => r._field == "memory_total")
+                  |> window(period: v.windowPeriod)
+                  |> last()
+                  |> map(fn: (r) => ({r with _value: float(v: r._value) / 1024.0 / 1024.0 / 1024.0}))
+                  |> group(columns: ["_value", "_time", "_start", "_stop"], mode: "except")
+                  |> yield(name: "last")
+          staticLegend: {}
+          suffix: ' GB'
+          width: 2
+          xPos: 8
+          yPos: 1
+        - colors:
+            - hex: '#00C9FF'
+              name: laser
+              type: text
+          decimalPlaces: 2
+          height: 2
+          kind: Single_Stat
+          name: Number of Runnng Docker containers
+          queries:
+            - query: |-
+                from(bucket: "test-bucket")
+                  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+                  |> filter(fn: (r) => r["_measurement"] == "docker")
+                  |> filter(fn: (r) => r["_field"] == "n_containers_running")
+                  |> group(columns: ["engine_host"])
+          staticLegend: {}
+          width: 2
+          xPos: 8
+          yPos: 2
+        - axes:
+            - base: "10"
+              name: x
+              scale: linear
+            - base: "10"
+              name: "y"
+              scale: linear
+              suffix: '%'
+            - base: "10"
+              name: y2
+              scale: linear
+          colors:
+            - hex: '#00C9FF'
+              name: laser
+              type: text
+            - hex: '#8F8AF4'
+              name: Do Androids Dream of Electric Sheep?
+              type: scale
+            - hex: '#A51414'
+              name: Do Androids Dream of Electric Sheep?
+              type: scale
+            - hex: '#F4CF31'
+              name: Do Androids Dream of Electric Sheep?
+              type: scale
+          decimalPlaces: 1
+          height: 3
+          kind: Single_Stat_Plus_Line
+          name: System Memory Usage
+          queries:
+            - query: |-
+                from(bucket: "test-bucket")
+                  |> range(start: v.timeRangeStart)
+                  |> filter(fn: (r) => r._measurement == "mem")
+                  |> filter(fn: (r) => r._field == "used_percent")
+                  |> window(period: v.windowPeriod)
+                  |> mean()
+                  |> group(columns: ["_value", "_time", "_start", "_stop"], mode: "except")
+                  |> yield(name: "mean")
+          staticLegend: {}
+          suffix: '%'
+          width: 3
+          xPos: 9
+          yPos: 8
+        - axes:
+            - base: "10"
+              name: x
+              scale: linear
+            - base: "10"
+              name: "y"
+              scale: linear
+          geom: line
+          height: 3
+          kind: Xy
+          name: CPU usage per container
+          queries:
+            - query: |-
+                from(bucket: "test-bucket")
+                  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+                  |> filter(fn: (r) => r._measurement == "cpu" or r._measurement == "docker_container_cpu")
+                  |> filter(fn: (r) => r._field == "usage_percent")
+                  |> window(period: v.windowPeriod)
+                  |> mean()
+                  |> group(columns: ["_value", "_time", "_start", "_stop"], mode: "except")
+                  |> keep(columns: ["_measurement","container_name", "host","_value","_field","_stop"])
+                  |> yield(name: "mean")
+          staticLegend: {}
+          width: 3
+          xPos: 9
+          yPos: 15
+        - colors:
+            - hex: '#00C9FF'
+              name: laser
+              type: text
+          decimalPlaces: 2
+          height: 3
+          kind: Single_Stat
+          name: Num Images
+          queries:
+            - query: |-
+                from(bucket: "test-bucket")
+                  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)
+                  |> filter(fn: (r) => r["_measurement"] == "docker")
+                  |> filter(fn: (r) => r["_field"] == "n_images")
+          staticLegend: {}
+          width: 2
+          xPos: 10
+          yPos: 1
+    description: A collection of useful visualizations for monitoring Docker stats
+    name: Docker
+---
+apiVersion: influxdata.com/v2alpha1
+kind: Telegraf
+metadata:
+    name: dangerous-nightingale-46d001
+spec:
+    associations:
+        - kind: Label
+          name: cool-ritchie-86d001
+        - kind: Label
+          name: friendly-newton-86d011
+        - kind: Label
+          name: gallant-shirley-86d00b
+        - kind: Label
+          name: kind-rosalind-86d005
+        - kind: Label
+          name: objective-saha-86d007
+        - kind: Label
+          name: peaceful-goldwasser-86d015
+        - kind: Label
+          name: quizzical-blackburn-86d00d
+        - kind: Label
+          name: reverent-liskov-86d013
+        - kind: Label
+          name: stubborn-montalcini-86d003
+        - kind: Label
+          name: wonderful-sanderson-86d00f
+        - kind: Label
+          name: zealous-wozniak-86d009
+    config: |
+        # Global tags can be specified here in key="value" format.
+        [global_tags]
+          # dc = "us-east-1" # will tag all metrics with dc=us-east-1
+          # rack = "1a"
+          ## Environment variables can be used as tags, and throughout the config file
+          # user = "$USER"
+
+
+        # Configuration for telegraf agent
+        [agent]
+          interval = "10s"
+          round_interval = true
+          metric_batch_size = 1000
+          metric_buffer_limit = 10000
+          collection_jitter = "0s"
+          flush_interval = "10s"
+          flush_jitter = "0s"
+          precision = ""
+
+          hostname = ""
+          omit_hostname = false
+
+
+        ###############################################################################
+        #                            OUTPUT PLUGINS                                   #
+        ###############################################################################
+
+        # Configuration for sending metrics to InfluxDB
+        [[outputs.influxdb_v2]]
+          urls = ["$INFLUX_HOST"]
+          token = "$INFLUX_TOKEN"
+          organization = "$INFLUX_ORG" ## Destination bucket to write into.
+          bucket = "docker"
+
+
+        ###############################################################################
+        #                            INPUT PLUGINS                                    #
+        ###############################################################################
+
+        [[inputs.cpu]]
+          percpu = true
+          totalcpu = true
+          collect_cpu_time = false
+          report_active = false
+
+        [[inputs.disk]]
+          #ignore_fs = ["tmpfs", "devtmpfs", "devfs", "iso9660", "overlay", "aufs", "squashfs"]
+
+        [[inputs.diskio]]
+
+        [[inputs.kernel]]
+
+        [[inputs.mem]]
+
+        [[inputs.net]]
+
+        [[inputs.processes]]
+
+        [[inputs.swap]]
+
+        [[inputs.system]]
+
+        [[inputs.docker]]
+          endpoint = "unix:///var/run/docker.sock"
+          gather_services = false
+          container_names = []
+          source_tag = false
+          container_name_include = []
+          container_name_exclude = []
+          timeout = "5s"
+          perdevice = true
+          total = true
+          docker_label_include = []
+          docker_label_exclude = []
+          tag_env = []
+    description: A set of plugins for monitoring your System and Docker.
+    name: Docker Monitoring
